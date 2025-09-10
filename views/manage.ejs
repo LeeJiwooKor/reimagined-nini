@@ -1,0 +1,59 @@
+<%- include('./partials/header') %>
+    <main>
+        <section class="view-section">
+            <h1>기록 보기</h1>
+            <div class="filter-container">
+                <label for="category-filter">카테고리 선택:</label>
+                <select id="category-filter">
+                    <option value="all">모두 보기</option>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category.categories %>"><%= category.categories %></option>
+                    <% })%>
+                </select>
+            </div>
+            <table class="records-table">
+                <thead>
+
+                        <tr>
+                            <th></th>
+                            <th>카테고리</th>
+                            <th>금액</th>
+                            <th>설명</th>
+                            <th>날짜</th>
+                        </tr>
+                    
+                </thead>
+                <tbody id="records-body">    
+                    <% datas.forEach(data => {%>
+                        <tr data-category="<%= data.category %>">
+                            <% const date = new Date(data.created_at).toISOString().split("T")[0]; %>
+                            <td><%= data.id %></td>
+                            <td><%= data.category %></td>
+                            <td>₩<%= data.price %></td>
+                            <td><%= data.detail %></td>
+                            <td><%= date %></td>
+                        </tr>
+                    <% }) %>
+
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <%- include('./partials/footer') %>
+    <script>
+        const categoryFilter = document.getElementById('category-filter');
+        const recordsBody = document.getElementById('records-body');
+
+        categoryFilter.addEventListener('change', () => {
+            const selectedCategory = categoryFilter.value;
+            const rows = recordsBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const rowCategory = row.getAttribute('data-category');
+                if (selectedCategory === 'all' || rowCategory === selectedCategory) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>

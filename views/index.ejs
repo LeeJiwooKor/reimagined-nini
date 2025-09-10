@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated FM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/" style="align-items: center; display: contents;;">
+                    <img src="/img/logo.png" alt="IFM" style="border-radius: 10%;">
+                    <span style="font-weight: 600;font-size: 120%;">통합자산관리시스템</span>
+                </a>
+            </div>
+            <button class="menu-toggle" aria-label="메뉴 열기/닫기">
+                <span class="menu-icon"></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="/" class="active">홈</a></li>
+                <li><a href="/dashboard">대시보드</a></li>
+                <li><a href="/help">문의</a></li>
+            </ul>
+        </nav>
+    </header>
+<main>
+<section class="hero-section">
+            <div class="hero-content">
+                <h1>Integrated FM</h1>
+                <h8>Integrated Finantial Manager</h8>
+                <p>재무 기록을 쉽고 효율적으로 관리하고 분석하세요.</p>
+                <div class="hero-buttons">
+                    <a href="/dashboard" class="btn-primary">대시보드 보기</a>
+                    <a href="/category" class="btn-secondary">카테고리 관리</a>
+                </div>
+            </div>
+</section>
+        <!--
+        <section class="recent-activities">
+
+            <div class="boxboxbox">
+                <h2>최근 활동</h2>
+                <ul>
+                    <li>2023-10-01: 급여 기록 추가</li>
+                    <li>2023-10-02: 식비 기록 수정</li>
+                    <li>2023-10-03: 투자 기록 삭제</li>
+                </ul>
+            </div>    
+
+        </section>
+-->
+
+        <section class="features-section">
+            <h2>주요 기능</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <a href="/dashboard">
+                        <h3>대시보드</h3>
+                        <p>한눈에 재무 상태를 확인하세요.</p>
+                    </a>
+                </div>
+                <div class="feature-card">
+                    <a href="/manage">
+                        <h3>기록 관리</h3>
+                        <p>재무 기록을 추가, 수정, 삭제하세요.</p>
+                    </a>
+                </div>
+                <div class="feature-card">
+                    <a href="/category">
+                        <h3>카테고리 관리</h3>
+                        <p>카테고리를 추가하고 관리하세요.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="quick-links">
+            <h2>빠른 링크</h2>
+            <div class="quick-links-grid">
+                <a href="/dashboard" class="btn-primary">대시보드</a>
+                <a href="/record" class="btn-secondary">기록 보기</a>
+                <a href="/manage" class="btn-primary">기록 추가</a>
+                <a href="/category" class="btn-secondary">카테고리 관리</a>
+            </div>
+        </section>
+        <section class="contact-support">
+            <h2>지원 요청</h2>
+            <p>문제가 발생했나요? 아래 버튼을 클릭하여 지원팀에 문의하세요.</p>
+            <a href="/help" class="btn-primary">지원팀 문의</a>
+        </section>
+    </main>
+
+<%- include('./partials/footer') %>

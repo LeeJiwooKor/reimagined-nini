@@ -1,0 +1,23 @@
+
+<h1>Accounts</h1>
+<p><a class="btn" href="/accounts/new">New Account</a></p>
+<table class="table">
+  <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Balance</th><th>Currency</th><th>Actions</th></tr></thead>
+  <tbody>
+  <% items.forEach(item => { %>
+    <tr>
+      <td><%= item.id %></td>
+      <td><%= item.name %></td>
+      <td><%= item.type %></td>
+      <td><%= Number(item.balance).toLocaleString() %></td>
+      <td><%= item.currency %></td>
+      <td>
+        <a href="/accounts/<%= item.id %>/edit">Edit</a>
+        <form method="post" action="/accounts/<%= item.id %>/delete" style="display:inline">
+          <button onclick="return confirm('Delete?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>

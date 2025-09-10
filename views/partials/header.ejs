@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated FM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="sidebar">
+    <div class="logo">
+        <a href="/" >
+            <img src="/img/logo.png" alt="IFM" style="border-radius: 10%; width: 50px;">
+        </a>
+    </div>
+    <ul class="nav-links">
+        <li><a href="/dashboard">대시보드</a></li>
+        <li><a href="/manage">기록 보기</a></li>
+        <li><a href="/account">계좌</a></li>
+        <li><a href="/banking">입금/출금</a></li>
+        <li><a href="/loss">지출</a></li>
+        <li><a href="/orders">주문</a></li>
+        <li><a href="/collaboration">거래처</a></li>
+        <li><a href="/category">카테고리 관리</a></li>
+        <li><a href="/help">문의</a></li>
+        <li><a href="/">나가기</a></li>
+    </ul>
+</header>
+    <style>/* Sidebar Menu */
+.sidebar .hi {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar hi:hover {
+    color: #fff;
+}
+
+.sidebar .hi a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 30%;
+}
+
+.sidebar .hi a:hover {
+    color: white;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 100%;
+    background-color: #333;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.sidebar .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+        flex-direction: row-reverse;
+
+}
+
+.sidebar .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    text-align: right;
+}
+
+.sidebar .nav-links a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 125%;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 30%;
+}
+
+.sidebar .nav-links a:hover {
+
+    background-color: #4d4d4d;
+}
+
+/* Push main content so it’s not hidden */
+main {
+    margin-left: 240px;
+    padding: 2rem;
+}
+</style>
+    

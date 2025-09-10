@@ -1,0 +1,264 @@
+<%- include('./partials/header') %>
+
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>손실 관리</h1>
+      <div class="actions">
+        <input type="search" id="search-loss" placeholder="손실 검색..." aria-label="검색" class="input" />
+        <button id="sort-loss-btn" class="btn btn-secondary">정렬 ⤴️</button>
+        <button id="open-loss-modal-btn" class="btn btn-primary">+ 손실 추가</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="records-table" aria-label="손실 목록">
+        <thead>
+          <tr>
+            <th scope="col">번호</th>
+            <th scope="col">날짜</th>
+            <th scope="col">카테고리</th>
+            <th scope="col">이름</th>
+            <th scope="col">가격</th>
+            <th scope="col">수량</th>
+            <th scope="col">메모</th>
+            <th scope="col">작업</th>
+          </tr>
+        </thead>
+        <tbody id="loss-body">
+          <% if (losses && losses.length > 0) { %>
+            <% losses.forEach((loss, index) => { %>
+              <tr data-id="<%= loss.id %>" data-category="<%= loss.category %>">
+                <td class="row-num"><%= index + 1 %></td>
+                <td class="loss-date"><%= loss.date %></td>
+                <td class="loss-category"><%= loss.category %></td>
+                <td class="loss-name"><%= loss.name %></td>
+                <td class="loss-price"><%= loss.price %></td>
+                <td class="loss-quantity"><%= loss.quantity %></td>
+                <td class="loss-memo"><%= loss.memo %></td>
+                <td>
+                  <button class="edit-btn btn btn-secondary">수정</button>
+                  <button class="delete-btn btn btn-danger">삭제</button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr class="empty-row">
+              <td colspan="8" style="text-align:center;">No losses</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<!-- Loss Add/Edit Modal -->
+<div id="loss-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" role="document">
+    <button class="modal-close close-loss-btn" aria-label="닫기">&times;</button>
+    <h2 id="loss-modal-title">손실 추가</h2>
+
+    <input type="date" id="loss-date" class="input" />
+    <select id="loss-category" style="margin-bottom:1rem;">
+        <% if (categories && categories.length > 0) { %>
+            <% categories.forEach(cat => { %>
+                <option value="<%= cat.categories %>"><%= cat.categories %></option>
+            <% }) %>
+        <% } else { %>
+            <option value="">No categories</option>
+        <% } %>
+
+
+    </select>
+    <input type="text" id="loss-name" class="input" placeholder="이름" />
+    <input type="number" id="loss-price" class="input" placeholder="가격 (원)" />
+    <input type="number" id="loss-quantity" class="input" placeholder="수량" />
+    <textarea id="loss-memo" class="input" placeholder="메모"></textarea>
+
+    <div class="modal-actions">
+      <button id="save-loss-btn" class="btn btn-primary">저장</button>
+      <button class="btn btn-secondary modal-cancel" data-target="loss-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="loss-delete-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" role="document">
+    <button class="modal-close close-loss-del-btn" aria-label="닫기">&times;</button>
+    <h2>손실 삭제</h2>
+    <p>정말 삭제하시겠습니까?</p>
+    <div class="modal-actions">
+      <button id="confirm-loss-delete-btn" class="btn btn-danger">삭제</button>
+      <button id="cancel-loss-delete-btn" class="btn btn-secondary">취소</button>
+    </div>
+  </div>
+</div>
+
+<style>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#fafafa; color:#333; }
+.view-section { max-width:1200px; margin:2rem auto; padding:1rem; }
+.view-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; }
+.view-header h1 { font-size:1.8rem; margin:0; color:#222; }
+
+.btn { padding:0.5rem 1rem; border-radius:8px; font-size:0.95rem; cursor:pointer; border:none; transition:background 0.2s, transform 0.1s; }
+.btn:hover { transform:translateY(-1px); }
+.btn:active { transform:translateY(0); }
+.btn-primary { background:#0077ff; color:#fff; }
+.btn-primary:hover { background:#005fd1; }
+.btn-secondary { background:#f0f0f0; color:#333; }
+.btn-secondary:hover { background:#e0e0e0; }
+.btn-danger { background:#e74c3c; color:#fff; }
+.btn-danger:hover { background:#c0392b; }
+
+.input { width:100%; padding:0.6rem 0.8rem; border-radius:8px; border:1px solid #ddd; font-size:0.95rem; }
+.input:focus { outline:none; border-color:#0077ff; box-shadow:0 0 0 2px rgba(0,119,255,0.2); }
+
+.records-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.records-table th, .records-table td { padding:0.8rem; border-bottom:1px solid #eee; text-align:left; }
+
+.modal { position:fixed; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.5); opacity:0; visibility:hidden; transition:opacity 0.25s, visibility 0.25s; z-index:1000; }
+.modal[aria-hidden="false"] { opacity:1; visibility:visible; }
+.modal-content { position:relative; background:#fff; padding:1.5rem; border-radius:12px; max-width:500px; width:100%;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15); transform:translateY(-20px); transition:transform 0.25s; }
+.modal[aria-hidden="false"] .modal-content { transform:translateY(0); }
+.modal-close { background:none; border:none; font-size:1.5rem; position:absolute; top:1rem; right:1rem; cursor:pointer; }
+
+.view-header .actions { display:flex; align-items:center; gap:0.6rem; width:100%; }
+.view-header .actions input[type="search"] { flex-grow:1; min-width:180px; height:42px; }
+.view-header .actions button { flex-shrink:0; height:42px; white-space:nowrap; }
+</style>
+
+<script>
+(function(){
+    function formatDateOnly(d) {
+  if (!d) return null;
+  try {
+    return format(new Date(d), 'yyyy-MM-dd');
+  } catch {
+    return d;
+  }
+}
+  const modal = document.getElementById('loss-modal');
+  const openBtn = document.getElementById('open-loss-modal-btn');
+  const saveBtn = document.getElementById('save-loss-btn');
+
+  const deleteModal = document.getElementById('loss-delete-modal');
+  const confirmDeleteBtn = document.getElementById('confirm-loss-delete-btn');
+  const cancelDeleteBtn = document.getElementById('cancel-loss-delete-btn');
+
+  const searchInput = document.getElementById('search-loss');
+  const sortBtn = document.getElementById('sort-loss-btn');
+  const tbody = document.getElementById('loss-body');
+
+  const dateInput = document.getElementById('loss-date');
+  const categoryInput = document.getElementById('loss-category');
+  const nameInput = document.getElementById('loss-name');
+  const priceInput = document.getElementById('loss-price');
+  const quantityInput = document.getElementById('loss-quantity');
+  const memoInput = document.getElementById('loss-memo');
+
+  let editingRow = null;
+  let deletingRow = null;
+  let sortAsc = true;
+
+  function showModal(m){ m.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function hideModal(m){ m.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+  function setSelectByValueOrText(select,val){
+    if(!select) return;
+    val = (val||'').trim();
+    if(!val){ select.value=''; return; }
+    let opt = Array.from(select.options).find(o=>o.value===val);
+    if(opt){ select.value=opt.value; return; }
+    opt = Array.from(select.options).find(o=>o.textContent.trim().toLowerCase()===val.toLowerCase());
+    if(opt) select.value=opt.value;
+  }
+
+  openBtn.addEventListener('click', ()=>{
+    editingRow=null;
+    document.getElementById('loss-modal-title').textContent='손실 추가';
+    dateInput.value=''; setSelectByValueOrText(categoryInput,''); nameInput.value=''; priceInput.value=''; quantityInput.value=''; memoInput.value='';
+    showModal(modal);
+  });
+  document.querySelectorAll('.modal-cancel,.modal-close').forEach(btn=>{
+    btn.addEventListener('click',()=>hideModal(btn.closest('.modal')));
+  });
+
+  searchInput.addEventListener('input', ()=>{
+    const q=searchInput.value.trim().toLowerCase();
+    Array.from(tbody.querySelectorAll('tr')).forEach(row=>{
+      const txt=(row.textContent||'').toLowerCase();
+      row.style.display=txt.includes(q)?'':'none';
+    });
+    updateNumbers();
+  });
+
+  sortBtn.addEventListener('click',()=>{
+    const rows=Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+    rows.sort((a,b)=>{
+      const aTime=Date.parse(a.querySelector('.loss-date')?.textContent||'');
+      const bTime=Date.parse(b.querySelector('.loss-date')?.textContent||'');
+      return sortAsc?(aTime-bTime):(bTime-aTime);
+    });
+    rows.forEach(r=>tbody.appendChild(r));
+    sortAsc=!sortAsc;
+    sortBtn.textContent=sortAsc?'정렬 ⤴️':'정렬 ⤵️';
+    updateNumbers();
+  });
+
+  tbody.addEventListener('click',e=>{
+    const tr=e.target.closest('tr'); if(!tr) return;
+    if(e.target.classList.contains('edit-btn')){
+      editingRow=tr;
+      document.getElementById('loss-modal-title').textContent='손실 수정';
+      dateInput.value=tr.querySelector('.loss-date')?.textContent.trim()||'';
+      setSelectByValueOrText(categoryInput,tr.dataset.category||tr.querySelector('.loss-category')?.textContent||'');
+      nameInput.value=tr.querySelector('.loss-name')?.textContent.trim()||'';
+      priceInput.value=(tr.querySelector('.loss-price')?.textContent||'').replace(/[₩,]/g,'').trim();
+      quantityInput.value=tr.querySelector('.loss-quantity')?.textContent.trim()||'';
+      memoInput.value=tr.querySelector('.loss-memo')?.textContent.trim()||'';
+      showModal(modal);
+    }
+    if(e.target.classList.contains('delete-btn')){
+      deletingRow=tr;
+      showModal(deleteModal);
+    }
+  });
+
+  saveBtn.addEventListener('click',async()=>{
+    const id=editingRow?.dataset.id;
+    const payload={ id, date:dateInput.value, category:categoryInput.value, name:nameInput.value.trim(),
+      price:Number(priceInput.value||0), quantity:Number(quantityInput.value||0), memo:memoInput.value.trim() };
+
+    const url=id?'/loss/edit':'/loss/add';
+    const res=await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data=await res.json();
+    if(data.valid) location.reload(); else alert(data.error||'실패');
+  });
+
+  confirmDeleteBtn.addEventListener('click',async()=>{
+    if(!deletingRow) return;
+    const res=await fetch('/loss/delete',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id:deletingRow.dataset.id }) });
+    const data=await res.json();
+    if(data.valid) location.reload(); else alert(data.error||'삭제 실패');
+  });
+  cancelDeleteBtn.addEventListener('click',()=>hideModal(deleteModal));
+
+  function updateNumbers(){
+    let i=0; let any=false;
+    tbody.querySelectorAll('tr:not(.empty-row)').forEach(r=>{
+      if(r.style.display==='none'){ r.querySelector('.row-num').textContent=''; }
+      else { r.querySelector('.row-num').textContent=++i; any=true; }
+    });
+    if(!any && !tbody.querySelector('.empty-row')){
+      const tr=document.createElement('tr'); tr.className='empty-row'; tr.innerHTML='<td colspan="8" style="text-align:center;">No losses</td>'; tbody.appendChild(tr);
+    }
+  }
+  updateNumbers();
+})();
+</script>

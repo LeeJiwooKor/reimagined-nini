@@ -1,0 +1,26 @@
+
+<h1>Edit Transaction</h1>
+<form method="post" action="/transactions/<%= tx.id %>/edit">
+  <label>Account</label>
+  <select name="account_id" required>
+    <% accounts.forEach(a=>{ %>
+      <option value="<%= a.id %>" <%= tx.account_id===a.id?'selected':'' %>><%= a.name %> (<%= a.currency %>)</option>
+    <% }) %>
+  </select>
+  <label>Type</label>
+  <select name="type">
+    <option value="in" <%= tx.type==='in'?'selected':'' %>>in</option>
+    <option value="out" <%= tx.type==='out'?'selected':'' %>>out</option>
+  </select>
+  <label>Amount</label><input name="amount" type="number" step="0.01" value="<%= tx.amount %>" required />
+  <label>Category</label><input name="category" value="<%= tx.category %>" />
+  <label>Asset (optional)</label>
+  <select name="asset_id">
+    <option value="">-- none --</option>
+    <% assets.forEach(as=>{ %>
+      <option value="<%= as.id %>" <%= tx.asset_id===as.id ? 'selected' : '' %>><%= as.name %></option>
+    <% }) %>
+  </select>
+  <label>Description</label><textarea name="description"><%= tx.description %></textarea>
+  <button>Save</button>
+</form>

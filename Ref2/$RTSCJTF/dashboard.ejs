@@ -1,0 +1,35 @@
+
+<h1>Dashboard</h1>
+<section class="summary-cards">
+  <div class="card">
+    <div class="card-title">Available Funds</div>
+    <div class="card-value"><%= totalBalance.toLocaleString() %>원</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Accounts</div>
+    <div class="card-value"><%= accounts.length %>개</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Assets</div>
+    <div class="card-value"><%= assets.length %>개</div>
+  </div>
+</section>
+
+<section>
+  <h2>Latest Transactions</h2>
+  <table class="table">
+    <thead><tr><th>날짜</th><th>계좌</th><th>카테고리</th><th>입/출</th><th>금액</th><th>설명</th></tr></thead>
+    <tbody>
+      <% transactions.forEach(tx => { %>
+        <tr>
+          <td><%= new Date(tx.created_at).toLocaleString() %></td>
+          <td><%= tx.account_name %></td>
+          <td><%= tx.category %></td>
+          <td><%= tx.type %></td>
+          <td><%= Number(tx.amount).toLocaleString() %></td>
+          <td><%= tx.description %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,13 @@
+<!- login page -->
+
+<div class="login-wrapper">
+  <form method="post" action="/login">
+    <h2>Sign in</h2>
+    <% if(message && message.length) { %><div class="alert"><%= message %></div><% } %>
+    <label>Username</label>
+    <input name="username" required />
+    <label>Password</label>
+    <input name="password" type="password" required />
+    <button type="submit">Login</button>
+  </form>
+</div>

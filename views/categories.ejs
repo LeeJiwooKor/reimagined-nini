@@ -1,0 +1,507 @@
+<%- include('./partials/header') %>
+
+<main>
+    <section class="view-section">
+        <div class="view-header">
+            <h1>카테고리 관리</h1>
+            <div class="actions">
+                <input type="search" id="search-category" placeholder="카테고리 검색..." aria-label="검색"/>
+                <button id="sort-btn" class="btn-secondary" title="알파벳 정렬">정렬 ⤴️</button>
+                <button id="open-modal-btn" class="btn-primary">+ 카테고리 추가</button>
+            </div>
+        </div>
+
+        <!-- Category Table -->
+        <div class="table-wrap">
+            <table class="records-table" role="table" aria-label="카테고리 목록">
+                <thead>
+                    <tr>
+                        <th scope="col">번호</th>
+                        <th hidden>id</th>
+                        <th scope="col">카테고리 이름</th>
+                        <th scope="col">작업</th>
+                    </tr>
+                </thead>
+                <tbody id="categories-body">
+                    <% categories.forEach((category, index) => { %>
+                        <tr data-id="<%= category.id %>">
+                            <td class="row-num"><%= index + 1 %></td>
+                            <td hidden id="<%= category.id %>"><%= category.id %></td>
+                            <td class="category-name"><%= category.categories %></td>
+                            <td>
+                                <button class="edit-btn btn-secondary">수정</button>
+                                <button class="delete-btn btn-danger">삭제</button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<!-- Add Modal -->
+<div id="category-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content" role="document">
+        <button class="modal-close close-btn" aria-label="닫기">&times;</button>
+        <h2>새 카테고리 추가</h2>
+        <label for="new-category" class="sr-only">카테고리 이름</label>
+        <input type="text" id="new-category" placeholder="카테고리 이름 입력" />
+        <div class="modal-actions">
+            <button id="add-category-btn" class="btn-primary">추가</button>
+            <button class="btn-secondary modal-cancel" data-target="category-modal">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content" role="document">
+        <button class="modal-close close-edit-btn" aria-label="닫기">&times;</button>
+        <h2>카테고리 수정</h2>
+        <label for="edit-category" class="sr-only">수정할 카테고리 이름</label>
+        <input type="text" id="edit-category" placeholder="카테고리 이름 수정" />
+        <div class="modal-actions">
+            <button id="save-edit-btn" class="btn-primary">저장</button>
+            <button class="btn-secondary modal-cancel" data-target="edit-modal">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="delete-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content" role="document">
+        <button class="modal-close close-delete-btn" aria-label="닫기">&times;</button>
+        <h2>카테고리 삭제</h2>
+        <p>정말 삭제하시겠습니까?</p>
+        <div class="modal-actions">
+            <button id="confirm-delete-btn" class="btn-danger">삭제</button>
+            <button id="cancel-delete-btn" class="btn-secondary">취소</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ---------- Page & Utility ---------- */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+/* View section */
+.view-section { max-width: 1100px; margin: 2rem auto; padding: 1rem; }
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.view-header h1 { margin: 0; font-size: 1.8rem; color: #333; flex: 1 1 auto; min-width: 160px; }
+
+.actions { display:flex; gap:0.75rem; align-items:center; flex: 0 1 auto; }
+#search-category {
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid #d0d0d0;
+    min-width: 200px;
+    flex: 1 1 220px;
+    box-sizing: border-box;
+}
+
+/* ---------- Buttons ---------- */
+button { font-weight: 600; cursor: pointer; border: none; }
+.btn-primary {
+    background: linear-gradient(90deg,#3b3b3b,#222);
+    color:#fff;
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #222;
+    padding: 0.45rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+.btn-secondary:hover { background: #e9ecef; transform: translateY(-2px); }
+
+.btn-danger {
+    background: linear-gradient(90deg,#ff6658,#ff442f);
+    color: #fff;
+    padding: 0.45rem 0.8rem;
+    border-radius: 8px;
+}
+.btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 14px rgba(255,68,47,0.12); }
+
+/* Table */
+.table-wrap { overflow-x:auto; background:#fff; padding:1rem; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.04); }
+.records-table { width:100%; border-collapse: collapse; min-width: 560px; }
+.records-table th, .records-table td {
+    padding: 0.85rem 0.9rem;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: middle;
+}
+.records-table thead th { background:#fafafa; position: sticky; top:0; z-index:1; font-weight:700; }
+.records-table tr:hover { background: #fbfbfb; }
+.row-num { width: 64px; }
+
+/* Action buttons in-table */
+.records-table td button { margin-right: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.95rem; }
+
+/* ---------- Modals ---------- */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2200;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow-y: auto;
+}
+.modal[aria-hidden="false"] { display:flex; }
+
+.modal-content {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.35rem 1.25rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+    position: relative;
+    transform: translateY(8px);
+    animation: modalIn .22s cubic-bezier(.2,.9,.2,1);
+}
+
+@keyframes modalIn {
+    from { opacity:0; transform: translateY(18px) scale(.995); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+.modal-content h2 { margin: 0 0 0.85rem 0; font-size: 1.3rem; color: #222; }
+.modal-content input { width:100%; padding:0.65rem 0.8rem; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:1rem; box-sizing:border-box; }
+
+/* close */
+.modal-close { position:absolute; top:10px; right:12px; background:transparent; font-size:1.6rem; color:#666; border-radius:50%; padding:0 6px; }
+.modal-close:hover { color:#111; transform:scale(1.05); }
+
+/* modal actions */
+.modal-actions { display:flex; gap:0.6rem; justify-content:flex-end; align-items:center; margin-top:0.25rem; }
+.records-table { 
+    width:100%; 
+    border-collapse: separate;   /* important: allow radius + border */
+    border-spacing: 0;           /* reset spacing */
+    border: 1px solid #ccc;      /* 🔥 outer border */
+    border-radius: 12px;         /* rounded edges */
+    overflow: hidden;            /* clip children */
+}
+
+.records-table thead th { 
+    background:#333;   /* Dark background */
+    color: #fff;       /* White text */
+    font-weight:700; 
+    position: sticky; 
+    top:0; 
+    z-index:1; 
+}
+
+.records-table .empty-row td {
+    text-align: center;
+    padding: 1.2rem;
+    font-style: italic;
+    color: #777;
+    background: #fafafa;
+    border-bottom: none;
+}
+/* small screens */
+@media (max-width:720px) {
+    .actions { width:100%; justify-content:stretch; }
+    #search-category { order: 1; width: 100%; flex:1 1 auto; min-width:unset; }
+    #sort-btn, #open-modal-btn { order: 2; }
+    .view-header h1 { width:100%; order:0; margin-bottom: 0.6rem; }
+    .table-wrap { padding: 0.6rem; }
+    .modal-content { padding: 1rem; margin: 0 0.5rem; }
+}
+</style>
+
+<script>
+/* ---------- DOM references ---------- */
+(function () {
+    const addModal = document.getElementById('category-modal');
+    const editModal = document.getElementById('edit-modal');
+    const deleteModal = document.getElementById('delete-modal');
+
+    const openBtn = document.getElementById('open-modal-btn');
+    const addBtn = document.getElementById('add-category-btn');
+    const saveEditBtn = document.getElementById('save-edit-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+    const addInput = document.getElementById('new-category');
+    const editInput = document.getElementById('edit-category');
+    const searchInput = document.getElementById('search-category');
+    const sortBtn = document.getElementById('sort-btn');
+
+    const tbody = document.getElementById('categories-body');
+
+    let editingRow = null;
+    let deletingRow = null;
+    let sortAsc = true;
+
+    /* helper to set modal visible state */
+    function showModal(modalEl) {
+        modalEl.setAttribute('aria-hidden', 'false');
+        // focus first input inside
+        const input = modalEl.querySelector('input');
+        if (input) input.focus();
+        document.body.style.overflow = 'hidden';
+    }
+    function hideModal(modalEl) {
+        modalEl.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    // open add modal
+    openBtn.addEventListener('click', () => {
+        addInput.value = '';
+        showModal(addModal);
+    });
+
+    // cancel buttons (data-target)
+    document.querySelectorAll('.modal-cancel').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetId = btn.dataset.target;
+            if (targetId) hideModal(document.getElementById(targetId));
+        });
+    });
+
+    // close icons
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            if (modal) hideModal(modal);
+        });
+    });
+
+    // click outside modal content closes
+    [addModal, editModal, deleteModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal(modal);
+        });
+    });
+
+    // keyboard Escape to close modals
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            [addModal, editModal, deleteModal].forEach(m => m.setAttribute('aria-hidden', 'true'));
+            document.body.style.overflow = '';
+        }
+    });
+
+    /* ---------- Search (live) ---------- */
+    searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.forEach(row => {
+            const cell = row.querySelector('.category-name');
+            if (!cell) { row.style.display = ''; return; }
+            const txt = cell.textContent.trim().toLowerCase();
+            row.style.display = (txt.indexOf(q) !== -1) ? '' : 'none';
+        });
+        updateNumbers(); // only visible rows renumbered
+    });
+
+    /* ---------- Sort ---------- */
+    sortBtn.addEventListener('click', () => {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const aText = (a.querySelector('.category-name')?.textContent || '').trim().toLowerCase();
+            const bText = (b.querySelector('.category-name')?.textContent || '').trim().toLowerCase();
+            return sortAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+        sortAsc = !sortAsc;
+        sortBtn.textContent = sortAsc ? '정렬 ⤴️' : '정렬 ⤵️';
+        updateNumbers();
+    });
+
+    /* ---------- Add Category ---------- */
+    addBtn.addEventListener('click', async () => {
+        const name = addInput.value.trim();
+        if (!name) return alert('카테고리 이름을 입력하세요.');
+        try {
+            const res = await fetch('/category/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            if (data && data.valid === true) {
+                // create row
+                const row = document.createElement('tr');
+                row.dataset.id = data.id;
+                row.innerHTML = `
+                    <td class="row-num"></td>
+                    <td hidden id="${data.id}">${data.id}</td>
+                    <td class="category-name"></td>
+                    <td>
+                        <button class="edit-btn btn-secondary">수정</button>
+                        <button class="delete-btn btn-danger">삭제</button>
+                    </td>
+                `;
+                row.querySelector('.category-name').textContent = data.name || data.name;
+                tbody.appendChild(row);
+                hideModal(addModal);
+                addInput.value = '';
+                updateNumbers();
+                // scroll into view
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                alert((data && data.error) ? data.error : '추가 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('서버 오류가 발생했습니다.');
+        }
+    });
+
+    /* ---------- Table-level delegation for Edit/Delete ---------- */
+    tbody.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr');
+        if (!tr) return;
+        // Edit
+        if (e.target.classList.contains('edit-btn')) {
+            editingRow = tr;
+            const name = editingRow.querySelector('.category-name')?.textContent || '';
+            editInput.value = name;
+            showModal(editModal);
+            return;
+        }
+        // Delete
+        if (e.target.classList.contains('delete-btn')) {
+            deletingRow = tr;
+            showModal(deleteModal);
+            return;
+        }
+    });
+
+    /* ---------- Save Edit ---------- */
+    saveEditBtn.addEventListener('click', async () => {
+        if (!editingRow) return;
+        const newName = editInput.value.trim();
+        if (!newName) return alert('카테고리 이름을 입력하세요.');
+        const id = editingRow.dataset.id;
+        try {
+            const res = await fetch('/category/edit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id, name: newName })
+            });
+            const data = await res.json();
+            if (data && data.valid === true) {
+                editingRow.querySelector('.category-name').textContent = data.name;
+                hideModal(editModal);
+                editingRow = null;
+            } else {
+                alert((data && data.error) ? data.error : '수정 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('서버 오류가 발생했습니다.');
+        }
+    });
+
+    /* ---------- Confirm Delete ---------- */
+    confirmDeleteBtn.addEventListener('click', async () => {
+        if (!deletingRow) return;
+        const id = deletingRow.dataset.id;
+        try {
+            const res = await fetch('/category/delete', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id })
+            });
+            const data = await res.json();
+            if (data && data.valid === true) {
+                // nice removal animation
+                deletingRow.style.transition = 'opacity .28s ease, transform .28s ease, height .28s ease, margin .28s ease';
+                deletingRow.style.opacity = '0';
+                deletingRow.style.transform = 'translateX(-8px) scale(.995)';
+                deletingRow.style.height = deletingRow.offsetHeight + 'px';
+                // collapse after transition
+                setTimeout(() => {
+                    deletingRow.remove();
+                    updateNumbers();
+                }, 300);
+                hideModal(deleteModal);
+                
+                deletingRow = null;
+                window.location.reload();
+            } else {
+                alert((data && data.error) ? data.error : '삭제 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('서버 오류가 발생했습니다.');
+        }
+    });
+
+    cancelDeleteBtn.addEventListener('click', () => {
+        deletingRow = null;
+        hideModal(deleteModal);
+    });
+
+    /* ---------- Update visible row numbers ---------- */
+    function updateNumbers() {
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+    let visibleIndex = 0;
+    let anyVisible = false;
+
+    rows.forEach(row => {
+        if (row.style.display === 'none') {
+            row.querySelector('.row-num').textContent = '';
+        } else {
+            visibleIndex += 1;
+            row.querySelector('.row-num').textContent = visibleIndex;
+            anyVisible = true;
+        }
+    });
+
+    // Remove old "no category" row if exists
+    const oldEmpty = tbody.querySelector('.empty-row');
+    if (oldEmpty) oldEmpty.remove();
+
+    // If nothing visible → show placeholder row
+    if (!anyVisible) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.className = 'empty-row';
+        emptyRow.innerHTML = `<td colspan="4">No category</td>`;
+        tbody.appendChild(emptyRow);
+    }
+}
+
+    // initial numbering run
+    updateNumbers();
+
+    /* Accessibility: trap focus inside open modal (simple) */
+    document.addEventListener('focus', function (ev) {
+        const modals = [addModal, editModal, deleteModal];
+        const openModal = modals.find(m => m.getAttribute('aria-hidden') === 'false');
+        if (!openModal) return;
+        if (!openModal.contains(ev.target)) {
+            // force focus back to first focusable inside modal
+            const focusable = openModal.querySelector('input, button, [tabindex]:not([tabindex="-1"])');
+            if (focusable) focusable.focus();
+        }
+    }, true);
+
+})();
+</script>

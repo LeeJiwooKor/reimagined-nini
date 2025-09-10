@@ -1,0 +1,26 @@
+
+<h1>Transactions</h1>
+<p><a class="btn" href="/transactions/new">New Transaction</a></p>
+<table class="table">
+  <thead><tr><th>ID</th><th>Date</th><th>Account</th><th>Type</th><th>Amount</th><th>Category</th><th>Asset</th><th>Description</th><th>Actions</th></tr></thead>
+  <tbody>
+  <% items.forEach(item => { %>
+    <tr>
+      <td><%= item.id %></td>
+      <td><%= new Date(item.created_at).toLocaleString() %></td>
+      <td><%= item.account_name %></td>
+      <td><%= item.type %></td>
+      <td><%= Number(item.amount).toLocaleString() %></td>
+      <td><%= item.category %></td>
+      <td><%= item.asset_name %></td>
+      <td><%= item.description %></td>
+      <td>
+        <a href="/transactions/<%= item.id %>/edit">Edit</a>
+        <form method="post" action="/transactions/<%= item.id %>/delete" style="display:inline">
+          <button onclick="return confirm('Delete?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>

@@ -1,0 +1,472 @@
+<%- include('./partials/header') %>
+
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>계좌 관리</h1>
+      <div class="actions">
+        <input type="search" id="search-account" placeholder="계좌 검색..." aria-label="검색" />
+        <button id="sort-account-btn" class="btn-secondary">정렬 ⤴️</button>
+        <button id="open-account-modal-btn" class="btn-primary">+ 계좌 추가</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="records-table" aria-label="계좌 목록">
+        <thead>
+          <tr>
+            <th scope="col">번호</th>
+            <th scope="col">계좌번호</th>
+            <th scope="col">금액</th>
+            <th scope="col">용도</th>
+            <th scope="col">메모</th>
+            <th scope="col">작업</th>
+          </tr>
+        </thead>
+        <tbody id="accounts-body">
+          <% if (accounts && accounts.length > 0) { %>
+            <% accounts.forEach((account, index) => { %>
+              <tr data-id="<%= account.id %>">
+                <td class="row-num"><%= index + 1 %></td>
+                <td class="account-number"><%= account.number %></td>
+                <td class="account-balance">₩<%= account.balance %></td>
+                <td class="account-purpose"><%= account.purpose %></td>
+                <td class="account-memo"><%= account.memo %></td>
+                <td>
+                  <button class="deposit-btn btn-primary">입금</button>
+                  <button class="withdraw-btn btn-secondary">출금</button>
+                  <button class="edit-btn btn-secondary">수정</button>
+                  <button class="delete-btn btn-danger">삭제</button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr class="empty-row"><td colspan="6">No accounts</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<!-- Account Add/Edit Modal -->
+<div id="account-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" role="document">
+    <button class="modal-close close-account-btn" aria-label="닫기">&times;</button>
+    <h2 id="account-modal-title">계좌 추가</h2>
+    <input type="text" id="account-number" placeholder="계좌번호 (예: 123-456-789)" />
+    <input type="number" id="account-balance" placeholder="금액" />
+    <input type="text" id="account-purpose" placeholder="용도" />
+    <textarea id="account-memo" placeholder="메모"></textarea>
+    <div class="modal-actions">
+      <button id="save-account-btn" class="btn-primary">저장</button>
+      <button class="btn-secondary modal-cancel" data-target="account-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deposit Modal -->
+<div id="deposit-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" role="document">
+    <button class="modal-close close-deposit-btn" aria-label="닫기">&times;</button>
+    <h2 id="deposit-title">입금</h2>
+    <p id="deposit-account-info" style="margin:0 0 0.6rem 0; color:#555;"></p>
+    <input type="number" id="deposit-amount" placeholder="입금 금액" />
+    <input type="text" id="deposit-note" placeholder="메모 (선택)" />
+    <div class="modal-actions">
+      <button id="confirm-deposit-btn" class="btn-primary">확인</button>
+      <button class="btn-secondary modal-cancel" data-target="deposit-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div id="withdraw-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" role="document">
+    <button class="modal-close close-withdraw-btn" aria-label="닫기">&times;</button>
+    <h2 id="withdraw-title">출금</h2>
+    <p id="withdraw-account-info" style="margin:0 0 0.6rem 0; color:#555;"></p>
+    <input type="number" id="withdraw-amount" placeholder="출금 금액" />
+    <input type="text" id="withdraw-note" placeholder="메모 (선택)" />
+    <div class="modal-actions">
+      <button id="confirm-withdraw-btn" class="btn-danger">확인</button>
+      <button class="btn-secondary modal-cancel" data-target="withdraw-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="account-delete-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-content" role="document">
+    <button class="modal-close close-del-btn" aria-label="닫기">&times;</button>
+    <h2>계좌 삭제</h2>
+    <p>정말 삭제하시겠습니까?</p>
+    <div class="modal-actions">
+      <button id="confirm-account-delete-btn" class="btn-danger">삭제</button>
+      <button id="cancel-account-delete-btn" class="btn-secondary">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* DOM refs */
+  const addModal = document.getElementById('account-modal');
+  const depositModal = document.getElementById('deposit-modal');
+  const withdrawModal = document.getElementById('withdraw-modal');
+  const deleteModal = document.getElementById('account-delete-modal');
+
+  const openAddBtn = document.getElementById('open-account-modal-btn');
+  const saveAccountBtn = document.getElementById('save-account-btn');
+
+  const depositConfirmBtn = document.getElementById('confirm-deposit-btn');
+  const withdrawConfirmBtn = document.getElementById('confirm-withdraw-btn');
+
+  const confirmDeleteBtn = document.getElementById('confirm-account-delete-btn');
+  const cancelDeleteBtn = document.getElementById('cancel-account-delete-btn');
+
+  const searchInput = document.getElementById('search-account');
+  const sortBtn = document.getElementById('sort-account-btn');
+  const tbody = document.getElementById('accounts-body');
+
+  /* form fields */
+  const accNumberInput = document.getElementById('account-number');
+  const accBalanceInput = document.getElementById('account-balance');
+  const accPurposeInput = document.getElementById('account-purpose');
+  const accMemoInput = document.getElementById('account-memo');
+
+  const depositAmountInput = document.getElementById('deposit-amount');
+  const depositNoteInput = document.getElementById('deposit-note');
+  const depositInfo = document.getElementById('deposit-account-info');
+
+  const withdrawAmountInput = document.getElementById('withdraw-amount');
+  const withdrawNoteInput = document.getElementById('withdraw-note');
+  const withdrawInfo = document.getElementById('withdraw-account-info');
+
+  let editingRow = null;
+  let deletingRow = null;
+  let activeAccountRow = null; // for deposit/withdraw
+  let sortAsc = true;
+
+  function showModal(modal) {
+    modal.setAttribute('aria-hidden', 'false');
+    const input = modal.querySelector('input, textarea, button');
+    if (input) input.focus();
+    document.body.style.overflow = 'hidden';
+  }
+  function hideModal(modal) {
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  // open Add modal
+  openAddBtn.addEventListener('click', () => {
+    editingRow = null;
+    document.getElementById('account-modal-title').textContent = '계좌 추가';
+    accNumberInput.value = '';
+    accBalanceInput.value = '';
+    accPurposeInput.value = '';
+    accMemoInput.value = '';
+    showModal(addModal);
+  });
+
+  // Close modal buttons & cancel
+  document.querySelectorAll('.modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      if (target) hideModal(document.getElementById(target));
+    });
+  });
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modal = btn.closest('.modal'); if (modal) hideModal(modal);
+    });
+  });
+  [addModal, depositModal, withdrawModal, deleteModal].forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) hideModal(m); });
+  });
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') {
+    [addModal, depositModal, withdrawModal, deleteModal].forEach(m => m.setAttribute('aria-hidden','true'));
+    document.body.style.overflow = '';
+  }});
+
+  /* Search (live) */
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.forEach(row => {
+      const number = row.querySelector('.account-number')?.textContent || '';
+      const purpose = row.querySelector('.account-purpose')?.textContent || '';
+      const memo = row.querySelector('.account-memo')?.textContent || '';
+      const txt = (number + ' ' + purpose + ' ' + memo).toLowerCase();
+      row.style.display = txt.indexOf(q) !== -1 ? '' : 'none';
+    });
+    updateNumbers();
+  });
+
+  /* Sort by account number */
+  sortBtn.addEventListener('click', () => {
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a,b) => {
+      const aText = (a.querySelector('.account-number')?.textContent || '').trim().toLowerCase();
+      const bText = (b.querySelector('.account-number')?.textContent || '').trim().toLowerCase();
+      return sortAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
+    rows.forEach(r => tbody.appendChild(r));
+    sortAsc = !sortAsc;
+    sortBtn.textContent = sortAsc ? '정렬 ⤴️' : '정렬 ⤵️';
+    updateNumbers();
+  });
+
+  /* Table delegation for row buttons (deposit, withdraw, edit, delete) */
+  tbody.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    // Deposit
+    if (e.target.classList.contains('deposit-btn')) {
+      activeAccountRow = tr;
+      const accNum = tr.querySelector('.account-number')?.textContent || '';
+      depositInfo.textContent = `계좌: ${accNum}`;
+      depositAmountInput.value = '';
+      depositNoteInput.value = '';
+      showModal(depositModal);
+      return;
+    }
+    // Withdraw
+    if (e.target.classList.contains('withdraw-btn')) {
+      activeAccountRow = tr;
+      const accNum = tr.querySelector('.account-number')?.textContent || '';
+      withdrawInfo.textContent = `계좌: ${accNum}`;
+      withdrawAmountInput.value = '';
+      withdrawNoteInput.value = '';
+      showModal(withdrawModal);
+      return;
+    }
+    // Edit
+    if (e.target.classList.contains('edit-btn')) {
+      editingRow = tr;
+      document.getElementById('account-modal-title').textContent = '계좌 수정';
+      accNumberInput.value = tr.querySelector('.account-number')?.textContent || '';
+      // remove currency symbol if present
+      const rawBalance = (tr.querySelector('.account-balance')?.textContent || '').replace(/[₩,]/g,'').trim();
+      accBalanceInput.value = rawBalance || '';
+      accPurposeInput.value = tr.querySelector('.account-purpose')?.textContent || '';
+      accMemoInput.value = tr.querySelector('.account-memo')?.textContent || '';
+      showModal(addModal);
+      return;
+    }
+    // Delete
+    if (e.target.classList.contains('delete-btn')) {
+      deletingRow = tr;
+      showModal(deleteModal);
+      return;
+    }
+  });
+
+  /* Save account (add or edit) */
+  saveAccountBtn.addEventListener('click', async () => {
+    const number = accNumberInput.value.trim();
+    const balance = Number(accBalanceInput.value || 0);
+    const purpose = accPurposeInput.value.trim();
+    const memo = accMemoInput.value.trim();
+
+    if (!number) return alert('계좌번호를 입력하세요.');
+
+    const payload = { number, balance, purpose, memo };
+    try {
+      if (!editingRow) {
+        // add
+        const res = await fetch('/banking/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data && data.valid === true) {
+          const row = document.createElement('tr');
+          row.dataset.id = data.id;
+          row.innerHTML = `
+            <td class="row-num"></td>
+            <td class="account-number"></td>
+            <td class="account-balance"></td>
+            <td class="account-purpose"></td>
+            <td class="account-memo"></td>
+            <td>
+              <button class="deposit-btn btn-primary">입금</button>
+              <button class="withdraw-btn btn-secondary">출금</button>
+              <button class="edit-btn btn-secondary">수정</button>
+              <button class="delete-btn btn-danger">삭제</button>
+            </td>
+          `;
+          row.querySelector('.account-number').textContent = data.number;
+          row.querySelector('.account-balance').textContent = `₩${Number(data.balance || 0).toLocaleString()}`;
+          row.querySelector('.account-purpose').textContent = data.purpose || '';
+          row.querySelector('.account-memo').textContent = data.memo || '';
+          tbody.appendChild(row);
+          hideModal(addModal);
+          accNumberInput.value = accBalanceInput.value = accPurposeInput.value = accMemoInput.value = '';
+          updateNumbers();
+          row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          alert((data && data.error) ? data.error : '추가 실패');
+        }
+      } else {
+        // edit
+        const id = editingRow.dataset.id;
+        const res = await fetch('/banking/edit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...payload })
+        });
+        const data = await res.json();
+        if (data && data.valid === true) {
+          editingRow.querySelector('.account-number').textContent = data.number;
+          editingRow.querySelector('.account-balance').textContent = `₩${Number(data.balance || 0).toLocaleString()}`;
+          editingRow.querySelector('.account-purpose').textContent = data.purpose || '';
+          editingRow.querySelector('.account-memo').textContent = data.memo || '';
+          hideModal(addModal);
+          editingRow = null;
+        } else {
+          alert((data && data.error) ? data.error : '수정 실패');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 오류가 발생했습니다.');
+    }
+  });
+
+  /* Confirm deposit */
+  depositConfirmBtn.addEventListener('click', async () => {
+    if (!activeAccountRow) return;
+    const id = activeAccountRow.dataset.id;
+    const amount = Number(depositAmountInput.value || 0);
+    const note = depositNoteInput.value.trim();
+    if (!amount || amount <= 0) return alert('유효한 금액을 입력하세요.');
+    try {
+      const res = await fetch('/banking/deposit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, amount, note })
+      });
+      const data = await res.json();
+      if (data && data.valid === true) {
+        // update balance cell
+        activeAccountRow.querySelector('.account-balance').textContent = `₩${Number(data.newBalance || 0).toLocaleString()}`;
+        hideModal(depositModal);
+        activeAccountRow = null;
+      } else {
+        alert((data && data.error) ? data.error : '입금 실패');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 오류가 발생했습니다.');
+    }
+  });
+
+  /* Confirm withdraw */
+  withdrawConfirmBtn.addEventListener('click', async () => {
+    if (!activeAccountRow) return;
+    const id = activeAccountRow.dataset.id;
+    const amount = Number(withdrawAmountInput.value || 0);
+    const note = withdrawNoteInput.value.trim();
+    if (!amount || amount <= 0) return alert('유효한 금액을 입력하세요.');
+    try {
+      const res = await fetch('/banking/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, amount, note })
+      });
+      const data = await res.json();
+      if (data && data.valid === true) {
+        activeAccountRow.querySelector('.account-balance').textContent = `₩${Number(data.newBalance || 0).toLocaleString()}`;
+        hideModal(withdrawModal);
+        activeAccountRow = null;
+      } else {
+        alert((data && data.error) ? data.error : '출금 실패');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 오류가 발생했습니다.');
+    }
+  });
+
+  /* Confirm delete */
+  confirmDeleteBtn.addEventListener('click', async () => {
+    if (!deletingRow) return;
+    const id = deletingRow.dataset.id;
+    try {
+      const res = await fetch('/banking/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (data && data.valid === true) {
+        // animate and remove
+        deletingRow.style.transition = 'opacity .28s ease, transform .28s ease, height .28s ease, margin .28s ease';
+        deletingRow.style.opacity = '0';
+        deletingRow.style.transform = 'translateX(-8px) scale(.995)';
+        setTimeout(() => {
+          deletingRow.remove();
+          updateNumbers();
+        }, 300);
+        hideModal(deleteModal);
+        deletingRow = null;
+      } else {
+        alert((data && data.error) ? data.error : '삭제 실패');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 오류가 발생했습니다.');
+    }
+  });
+
+  cancelDeleteBtn.addEventListener('click', () => {
+    deletingRow = null;
+    hideModal(deleteModal);
+  });
+
+  /* renumber rows, show empty placeholder */
+  function updateNumbers() {
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+    let visibleIndex = 0;
+    let anyVisible = false;
+    rows.forEach(row => {
+      if (row.style.display === 'none') {
+        row.querySelector('.row-num').textContent = '';
+      } else {
+        visibleIndex += 1;
+        const numCell = row.querySelector('.row-num');
+        if (numCell) numCell.textContent = visibleIndex;
+        anyVisible = true;
+      }
+    });
+    const oldEmpty = tbody.querySelector('.empty-row');
+    if (oldEmpty) oldEmpty.remove();
+    if (!anyVisible) {
+      const emptyRow = document.createElement('tr');
+      emptyRow.className = 'empty-row';
+      emptyRow.innerHTML = `<td colspan="6">No accounts</td>`;
+      tbody.appendChild(emptyRow);
+    }
+  }
+
+  // initial
+  updateNumbers();
+
+  // keep focus trapped in open modal (simple)
+  document.addEventListener('focus', function (ev) {
+    const modals = [addModal, depositModal, withdrawModal, deleteModal];
+    const openModal = modals.find(m => m.getAttribute('aria-hidden') === 'false');
+    if (!openModal) return;
+    if (!openModal.contains(ev.target)) {
+      const focusable = openModal.querySelector('input, button, [tabindex]:not([tabindex="-1"])');
+      if (focusable) focusable.focus();
+    }
+  }, true);
+
+})();
+</script>
