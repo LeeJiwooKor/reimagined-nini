@@ -275,6 +275,10 @@ router.get('/dashboard', async (req, res) => {
 });
 //================= DASHBOARD API =================
 
+
+});
+
+
 // API: dashboard summary (numbers & recent activities)
 router.get('/api/dashboard/summary', async (req, res) => {
   try {
@@ -353,10 +357,6 @@ router.get('/api/dashboard/trends', async (req, res) => {
     res.status(500).json({ ok: false, error: 'Server error' });
   }
 });
-
-});
-
-
 
 // 404
 router.use((req, res) => {
