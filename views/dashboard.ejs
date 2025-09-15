@@ -1,76 +1,413 @@
 <%- include('./partials/header') %>
 
 <main>
-    <section class="dashboard-section">
-        <h1>대시보드</h1>
-        <div class="dashboard-cards">
-            <div class="card">
-                <h2>총 금액</h2>
-                <p>₩10,000,000</p>
-            </div>
-            <div class="card">
-                <h2>기록 수</h2>
-                <p>120</p>
-            </div>
-            <div class="card">
-                <h2>최근 업데이트</h2>
-                <p>2023-10-01</p>
-            </div>
+  <style>
+    /* ---------- Palette & base ---------- */
+    :root{
+      --bg:#f6f6f7;
+      --card:#ffffff;
+      --muted:#8b8b8f;
+      --accent:#0d0d0d;
+      --soft-shadow: 0 10px 30px rgba(10,10,10,0.06);
+    }
+    html,body { height:100%; }
+    body {
+      margin:0;
+      background: linear-gradient(180deg, var(--bg) 0%, #fbfbfb 100%);
+      font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+      color: var(--accent);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+    }
+    main {
+      margin-left: 240px;
+      padding: 40px;
+      box-sizing: border-box;
+      min-height: calc(100vh - 0px);
+    }
+
+    /* ---------- Header ---------- */
+    .dash-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+      flex-wrap:wrap;
+    }
+    .dash-title { display:flex; gap:14px; align-items:baseline; }
+    .dash-title h1 { margin:0; font-size:28px; letter-spacing:-0.4px; font-weight:700; color:var(--accent); }
+    .dash-title .subtitle { font-size:13px; color:var(--muted); }
+
+    .controls { display:flex; gap:10px; align-items:center; }
+    .control {
+      display:inline-flex; gap:8px; align-items:center;
+      background: var(--card);
+      border-radius:10px; padding:8px;
+      box-shadow: var(--soft-shadow);
+    }
+    .control select {
+      border:0; background:transparent; font-weight:600;
+      padding:6px 8px; font-size:14px; color:var(--accent); outline:none;
+      -webkit-appearance:none; appearance:none;
+    }
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      border:0; border-radius:10px; padding:10px 14px;
+      cursor:pointer; font-weight:600; font-size:14px;
+      transition:transform .12s ease, box-shadow .12s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      background: linear-gradient(180deg,#111,#1c1c1c); color:#fff;
+    }
+    .btn.secondary { background: transparent; color:var(--accent); border:1px solid rgba(15,15,15,0.06); box-shadow:none; }
+    .btn:active { transform:translateY(1px); }
+
+    /* ---------- Grid & Cards ---------- */
+    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap:18px; align-items:stretch; }
+    .card { background:var(--card); border-radius:14px; padding:18px; box-shadow: var(--soft-shadow); display:flex; flex-direction:column; justify-content:space-between; min-height:110px; }
+    .stat { grid-column: span 3; padding:20px; }
+    .stat .label { font-size:13px; color:var(--muted); margin-bottom:8px; }
+    .stat .value { font-size:22px; font-weight:700; color:var(--accent); }
+    .stat .meta { font-size:12px; color:var(--muted); margin-top:8px; }
+    .chart-card { grid-column: span 8; padding:18px; }
+    .right-panel { grid-column: span 4; padding:18px; display:flex; flex-direction:column; gap:14px; }
+
+    /* ---------- Accounts area (IMPROVED) ---------- */
+    .accounts { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+    .account-row { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; background: linear-gradient(180deg,#fff,#fbfbfb); border:1px solid rgba(8,8,8,0.03); }
+    .account-left { display:flex; gap:12px; align-items:center; }
+    .acct-dot { width:10px; height:10px; border-radius:50%; background:#111; opacity:0.85; }
+    .acct-name { font-weight:700; color:var(--accent); }
+    .acct-meta { font-size:12px; color:var(--muted); }
+    .acct-balance { font-weight:700; color:var(--accent); }
+
+    /* ======= QUICK ADD (DESIGNED) ======= */
+    .quick-group {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:12px;
+    }
+    /* Primary row: input + select + button aligned */
+    .quick-group .q-input {
+      flex:1;
+      min-width:0; /* important for flex shrinking */
+    }
+    .q-input input {
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(8,8,8,0.06);
+      font-weight:600;
+      outline:none;
+      background:transparent;
+      box-sizing:border-box;
+    }
+    .q-select {
+      width:140px;
+      flex-shrink:0;
+    }
+    .q-select select {
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(8,8,8,0.06);
+      font-weight:600;
+      outline:none;
+      background:transparent;
+    }
+    .q-add {
+      flex-shrink:0;
+    }
+    .q-add .btn {
+      padding:10px 14px;
+      height:44px;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* Small-screen stacking */
+    @media (max-width:680px){
+      .quick-group { flex-direction:column; align-items:stretch; }
+      .q-select { width:100%; }
+      .q-add .btn { width:100%; }
+      .grid { gap:12px; }
+      .stat { grid-column: span 12; }
+      .chart-card { grid-column: span 12; }
+      .right-panel { grid-column: span 12; }
+      main { margin-left: 0; padding:18px; }
+    }
+
+    /* Activities */
+    .activities { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+    .activity { display:flex; justify-content:space-between; gap:12px; padding:12px; border-radius:10px; background: linear-gradient(180deg,#fff,#fcfcfc); border:1px solid rgba(8,8,8,0.03); }
+    .activity-left { display:flex; gap:12px; align-items:center; }
+    .activity .title { font-weight:600; color:var(--accent); }
+    .activity .desc { font-size:13px; color:var(--muted); margin-top:4px; }
+    .activity .time { font-size:12px; color:var(--muted); }
+
+    #financeChart { height:320px; width:100%; }
+  </style>
+
+  <!-- ---------- Markup ---------- -->
+  <section class="dash-head" aria-label="dashboard header">
+    <div class="dash-title">
+      <h1>대시보드</h1>
+      <div class="subtitle">개요 · 재무 상태 · 최근 활동</div>
+    </div>
+
+    <div class="controls" role="toolbar" aria-label="dashboard controls">
+      <div class="control" title="기간 선택">
+        <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <select id="months" aria-label="기간">
+          <option value="3">최근 3개월</option>
+          <option value="6" selected>최근 6개월</option>
+          <option value="12">최근 12개월</option>
+          <option value="24">최근 24개월</option>
+        </select>
+      </div>
+
+      <button id="refreshBtn" class="btn" title="새로고침">새로고침</button>
+      <button id="addQuickBtn" class="btn secondary" title="빠른 추가">빠른 추가</button>
+    </div>
+  </section>
+
+  <section class="grid" aria-live="polite">
+    <!-- STAT CARDS -->
+    <div class="stat card">
+      <div class="label">총 은행 잔액</div>
+      <div class="value" id="totalMoney">₩0</div>
+      <div class="meta" id="totalMoneyMeta">계좌 0개</div>
+    </div>
+
+    <div class="stat card">
+      <div class="label">총 지출 합계</div>
+      <div class="value" id="totalLossAmount">₩0</div>
+      <div class="meta" id="totalLossCount">항목 0개</div>
+    </div>
+
+    <div class="stat card">
+      <div class="label">기타 총액</div>
+      <div class="value" id="totalFinanceAmount">₩0</div>
+      <div class="meta" id="totalFinanceCount">기록 0개</div>
+    </div>
+
+    <div class="stat card">
+      <div class="label">카테고리 수</div>
+      <div class="value" id="totalCategories">0</div>
+      <div class="meta" id="lastUpdate">마지막: <%= stats.last_modified ? new Date(stats.last_modified).toISOString().slice(0,10) : 'N/A' %></div>
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-card card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+        <div>
+          <h3 style="margin:0; font-size:16px;">금액 추세</h3>
+          <div style="font-size:13px; color:var(--muted); margin-top:6px;">월별 지출 및 계좌 변동</div>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">범례: <strong>지출</strong> · <strong style="color:#767676">계좌 변동</strong></div>
+      </div>
+      <div id="financeChart" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- RIGHT PANEL: accounts + activities -->
+    <aside class="right-panel">
+      <div class="card" style="padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div>
+            <h3 style="margin:0; font-size:15px;">은행 계좌</h3>
+            <div style="font-size:13px; color:var(--muted);">계좌 요약 및 빠른 작업</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button id="openAddAccount" class="btn secondary" style="padding:8px 10px; font-size:13px;">계좌 추가</button>
+          </div>
         </div>
 
-        <div class="graph-section">
-            <h2>금액 추세</h2>
-            <div id="financeChart" style="width: 100%; height: 400px;"></div>
+        <!-- IMPROVED QUICK ADD -->
+        <div class="quick-group" aria-label="quick add account">
+          <div class="q-input" title="계좌명">
+            <input id="quickName" type="text" placeholder="새 계좌명 (예: 내 주거래계좌)" />
+          </div>
+
+          <div class="q-select" title="계좌유형">
+            <select id="quickType">
+              <option>Checking</option><option>Savings</option><option>Credit</option><option>Cash</option><option>Other</option>
+            </select>
+          </div>
+
+          <div class="q-add">
+            <button id="quickAddBtn" class="btn">추가</button>
+          </div>
         </div>
-    </section>
+
+        <div class="accounts" id="accountsList" aria-live="polite"></div>
+      </div>
+
+      <div class="card" style="padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:15px; margin:0;">최근 활동</h3>
+          <div style="font-size:13px; color:var(--muted);">최신 8건</div>
+        </div>
+        <div class="activities" id="activitiesList" style="margin-top:12px; max-height:360px; overflow:auto;"></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ---------- Scripts ---------- -->
+  <script src="/js/apexcharts.min.js"></script>
+  <script>
+    (function(){
+      function krw(n){ const num=Number(n)||0; return '₩' + num.toLocaleString('ko-KR'); }
+
+      const totalMoneyEl = document.getElementById('totalMoney');
+      const totalMoneyMeta = document.getElementById('totalMoneyMeta');
+      const totalLossAmount = document.getElementById('totalLossAmount');
+      const totalLossCount = document.getElementById('totalLossCount');
+      const totalFinanceAmount = document.getElementById('totalFinanceAmount');
+      const totalFinanceCount = document.getElementById('totalFinanceCount');
+      const totalCategories = document.getElementById('totalCategories');
+      const accountsList = document.getElementById('accountsList');
+      const activitiesList = document.getElementById('activitiesList');
+      const monthsSelect = document.getElementById('months');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const addQuickBtn = document.getElementById('addQuickBtn');
+      const quickAddBtn = document.getElementById('quickAddBtn');
+      const quickName = document.getElementById('quickName');
+      const quickType = document.getElementById('quickType');
+
+      let chart = null;
+
+      async function api(path, opts){
+        opts = opts || {};
+        opts.headers = Object.assign({'Accept':'application/json'}, opts.headers || {});
+        const res = await fetch(path, opts);
+        if(!res.ok) throw new Error('Network error: ' + res.status);
+        return res.json();
+      }
+
+      async function loadSummary(){
+        try{
+          const data = await api('/api/dashboard/summary');
+          if(!data.ok) return;
+          totalMoneyEl.textContent = krw(data.accounts_balance);
+          totalMoneyMeta.textContent = `${data.accounts_count}개 계좌`;
+          totalLossAmount.textContent = krw(data.loss_total);
+          totalLossCount.textContent = `항목 ${data.loss_count}개`;
+          totalFinanceAmount.textContent = krw(data.finances_total);
+          totalFinanceCount.textContent = `기록 ${data.finances_count}개`;
+          totalCategories.textContent = data.categories_count;
+
+          activitiesList.innerHTML = '';
+          (data.recent_activities || []).forEach(act=>{
+            const d = document.createElement('div');
+            d.className = 'activity';
+            d.innerHTML = `
+              <div class="activity-left">
+                <div style="width:10px;height:10px;border-radius:50%;background:#222;margin-right:8px"></div>
+                <div>
+                  <div class="title">${escapeHtml(act.action || 'activity')}</div>
+                  <div class="desc">${escapeHtml(act.details || '')}</div>
+                </div>
+              </div>
+              <div class="time">${(new Date(act.created_at)).toISOString().slice(0,10)}</div>
+            `;
+            activitiesList.appendChild(d);
+          });
+        }catch(err){ console.error('loadSummary', err); }
+      }
+
+      async function loadAccounts(){
+        try{
+          const data = await api('/api/banking/accounts');
+          if(!data.ok) return;
+          accountsList.innerHTML = '';
+          data.accounts.forEach(acc=>{
+            const node = document.createElement('div');
+            node.className = 'account-row';
+            node.innerHTML = `
+              <div class="account-left">
+                <div class="acct-dot" aria-hidden="true"></div>
+                <div>
+                  <div class="acct-name">${escapeHtml(acc.name)}</div>
+                  <div class="acct-meta">${escapeHtml(acc.type)} · ${new Date(acc.created_at).toISOString().slice(0,10)}</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div class="acct-balance">${krw(acc.balance)}</div>
+                <div>
+                  <button data-id="${acc.id}" class="btn secondary" style="padding:6px 8px; font-size:12px">삭제</button>
+                </div>
+              </div>
+            `;
+            accountsList.appendChild(node);
+          });
+
+          // bind delete buttons
+          accountsList.querySelectorAll('button[data-id]').forEach(btn=>{
+            btn.addEventListener('click', async (ev)=>{
+              const id = btn.getAttribute('data-id');
+              if(!confirm('계좌를 삭제하시겠습니까?')) return;
+              try{
+                const r = await api('/banking/account/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) });
+                if(r.valid) await refreshAll();
+                else alert(r.error || '삭제 실패');
+              }catch(e){ alert('삭제 중 오류'); console.error(e); }
+            });
+          });
+
+        }catch(err){ console.error('loadAccounts', err); }
+      }
+
+      async function loadTrends(){
+        try{
+          const months = monthsSelect.value || 6;
+          const data = await api('/api/dashboard/trends?months=' + encodeURIComponent(months));
+          if(!data.ok) return;
+          const opts = {
+            chart: { type:'area', height:320, toolbar:{ show:false } },
+            series: [
+              { name:'지출', data: data.losses.map(x=>Math.round(x)) },
+              { name:'계좌 변동', data: data.transactions.map(x=>Math.round(x)) }
+            ],
+            stroke: { curve:'smooth', width:2 },
+            fill: { type:'gradient', gradient:{ opacityFrom:0.12, opacityTo:0.02 } },
+            markers: { size:3 },
+            xaxis: { categories: data.labels },
+            yaxis: { labels:{ formatter: v => v >= 1000 ? (v/1000) + 'k' : v } },
+            colors: ['#111','rgba(34,34,34,0.45)'],
+            tooltip: { y: { formatter: v => krw(v) } },
+            legend: { position:'top' }
+          };
+          if(chart){ chart.updateOptions(opts); chart.updateSeries(opts.series); }
+          else { chart = new ApexCharts(document.querySelector('#financeChart'), opts); chart.render(); }
+        }catch(err){ console.error('loadTrends', err); }
+      }
+
+      async function quickAddAccount(){
+        const name = quickName.value.trim();
+        const type = quickType.value;
+        if(!name) return alert('계좌명을 입력하세요.');
+        try{
+          const res = await fetch('/banking/account/add', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, type })});
+          const j = await res.json();
+          if(j.valid){ quickName.value=''; await refreshAll(); } else { alert(j.error||'추가 실패'); }
+        }catch(e){ console.error(e); alert('서버 에러'); }
+      }
+
+      function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+
+      async function refreshAll(){ await Promise.all([loadSummary(), loadAccounts(), loadTrends()]); }
+
+      refreshBtn.addEventListener('click', refreshAll);
+      monthsSelect.addEventListener('change', loadTrends);
+      quickAddBtn.addEventListener('click', quickAddAccount);
+      addQuickBtn.addEventListener('click', ()=>{ quickName.focus(); });
+      document.addEventListener('DOMContentLoaded', refreshAll);
+    })();
+  </script>
 </main>
-
-<!-- ApexCharts (offline) -->
-<script src="/js/apexcharts.min.js"></script>
-<script>
-    // Example data, can be replaced with dynamic EJS variables
-    const chartData = {
-        labels: ['1월', '2월', '3월', '4월', '5월', '6월'], 
-        values: [1000000, 1500000, 1200000, 1800000, 2000000, 1700000]
-    };
-
-    const options = {
-        chart: {
-            type: 'line',
-            height: 400,
-            toolbar: { show: false }
-        },
-        series: [{
-            name: '월별 금액',
-            data: chartData.values
-        }],
-        xaxis: {
-            categories: chartData.labels,
-            title: { text: '월' }
-        },
-        yaxis: {
-            title: { text: '금액 (₩)' },
-            min: 0
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 2
-        },
-        markers: {
-            size: 4
-        },
-        tooltip: {
-            y: {
-                formatter: val => `₩${val.toLocaleString()}`
-            }
-        },
-        legend: {
-            position: 'top'
-        }
-    };
-
-    const chart = new ApexCharts(document.querySelector("#financeChart"), options);
-    chart.render();
-</script>
 
 <%- include('./partials/footer') %>

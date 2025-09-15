@@ -3,16 +3,16 @@
 <main>
   <section class="view-section">
     <div class="view-header">
-      <h1>손실 관리</h1>
+      <h1>지출 관리</h1>
       <div class="actions">
-        <input type="search" id="search-loss" placeholder="손실 검색..." aria-label="검색" class="input" />
+        <input type="search" id="search-loss" placeholder="지출 검색..." aria-label="검색" class="input" />
         <button id="sort-loss-btn" class="btn btn-secondary">정렬 ⤴️</button>
-        <button id="open-loss-modal-btn" class="btn btn-primary">+ 손실 추가</button>
+        <button id="open-loss-modal-btn" class="btn btn-primary">+ 지출 추가</button>
       </div>
     </div>
 
     <div class="table-wrap">
-      <table class="records-table" aria-label="손실 목록">
+      <table class="records-table" aria-label="지출 목록">
         <thead>
           <tr>
             <th scope="col">번호</th>
@@ -59,7 +59,7 @@
 <div id="loss-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="modal-content" role="document">
     <button class="modal-close close-loss-btn" aria-label="닫기">&times;</button>
-    <h2 id="loss-modal-title">손실 추가</h2>
+    <h2 id="loss-modal-title">지출 추가</h2>
 
     <input type="date" id="loss-date" class="input" />
     <select id="loss-category" style="margin-bottom:1rem;">
@@ -89,7 +89,7 @@
 <div id="loss-delete-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="modal-content" role="document">
     <button class="modal-close close-loss-del-btn" aria-label="닫기">&times;</button>
-    <h2>손실 삭제</h2>
+    <h2>지출 삭제</h2>
     <p>정말 삭제하시겠습니까?</p>
     <div class="modal-actions">
       <button id="confirm-loss-delete-btn" class="btn btn-danger">삭제</button>
@@ -181,7 +181,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 
   openBtn.addEventListener('click', ()=>{
     editingRow=null;
-    document.getElementById('loss-modal-title').textContent='손실 추가';
+    document.getElementById('loss-modal-title').textContent='지출 추가';
     dateInput.value=''; setSelectByValueOrText(categoryInput,''); nameInput.value=''; priceInput.value=''; quantityInput.value=''; memoInput.value='';
     showModal(modal);
   });
@@ -215,7 +215,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
     const tr=e.target.closest('tr'); if(!tr) return;
     if(e.target.classList.contains('edit-btn')){
       editingRow=tr;
-      document.getElementById('loss-modal-title').textContent='손실 수정';
+      document.getElementById('loss-modal-title').textContent='지출 수정';
       dateInput.value=tr.querySelector('.loss-date')?.textContent.trim()||'';
       setSelectByValueOrText(categoryInput,tr.dataset.category||tr.querySelector('.loss-category')?.textContent||'');
       nameInput.value=tr.querySelector('.loss-name')?.textContent.trim()||'';

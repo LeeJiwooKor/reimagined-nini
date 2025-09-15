@@ -1,10 +1,8 @@
-
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     categories VARCHAR(255) NOT NULL UNIQUE
 );
 
--- Table for financial records
 CREATE TABLE records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
@@ -14,14 +12,12 @@ CREATE TABLE records (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
--- Table for recent activities
 CREATE TABLE activities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     action VARCHAR(255) NOT NULL,
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 
 CREATE TABLE finances (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,9 +51,33 @@ CREATE TABLE alsoValues (
 CREATE TABLE losses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category TEXT,
-    name TEXT
+    name TEXT,
     price INT,
     memo TEXT,
     quantity INT,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ======================
+-- BANKING MODULE
+-- ======================
+
+CREATE TABLE bank_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('Checking', 'Savings', 'Credit', 'Cash', 'Other') DEFAULT 'Other',
+    balance DECIMAL(12, 2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE bank_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT NOT NULL,
+    related_account_id INT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    type ENUM('Deposit', 'Withdrawal', 'Transfer', 'Payment') NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (account_id) REFERENCES bank_accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (related_account_id) REFERENCES bank_accounts(id) ON DELETE SET NULL
 );

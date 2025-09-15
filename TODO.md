@@ -27,18 +27,9 @@
     - [리스트작성] 거래상품
     - [필드] 메모
 
-- 지출(품목) 메뉴 → “사입” 으로 바꾸기
-
-- 지출(품목) 추가 화면
-    - “방법” 지우기
-    - [일자] 일자
-    - [필드] 상품명
-    - [필드] 사입 갯수
-    - [필드] 총액
-    - [필드] 메모
     
 
 -DB overflow: 2147483647 (2^32 -1) set filter for it
-- - sidebar width smaller
-- - sidebar 'a' width to full sidebar size
-- - edit '손실' into '지출'
+- - loss ejs is not working ID, set ref to loss and edit
+
+- - sidebar 'a' width to full sidebar size 
