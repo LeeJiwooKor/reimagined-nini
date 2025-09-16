@@ -70,7 +70,7 @@
     .stat .label { font-size:13px; color:var(--muted); margin-bottom:8px; }
     .stat .value { font-size:22px; font-weight:700; color:var(--accent); }
     .stat .meta { font-size:12px; color:var(--muted); margin-top:8px; }
-    .chart-card { grid-column: span 8; padding:18px; }
+    .chart-card { grid-column: span 8; padding:18px; justify-content: flex-start;}
     .right-panel { grid-column: span 4; padding:18px; display:flex; flex-direction:column; gap:14px; }
 
     /* ---------- Accounts area (IMPROVED) ---------- */
@@ -190,12 +190,6 @@
     </div>
 
     <div class="stat card">
-      <div class="label">기타 총액</div>
-      <div class="value" id="totalFinanceAmount">₩0</div>
-      <div class="meta" id="totalFinanceCount">기록 0개</div>
-    </div>
-
-    <div class="stat card">
       <div class="label">카테고리 수</div>
       <div class="value" id="totalCategories">0</div>
       <div class="meta" id="lastUpdate">마지막: <%= stats.last_modified ? new Date(stats.last_modified).toISOString().slice(0,10) : 'N/A' %></div>
@@ -294,12 +288,11 @@
           if(!data.ok) return;
           totalMoneyEl.textContent = krw(data.accounts_balance);
           totalMoneyMeta.textContent = `${data.accounts_count}개 계좌`;
-          totalLossAmount.textContent = krw(data.loss_total);
-          totalLossCount.textContent = `항목 ${data.loss_count}개`;
-          totalFinanceAmount.textContent = krw(data.finances_total);
-          totalFinanceCount.textContent = `기록 ${data.finances_count}개`;
-          totalCategories.textContent = data.categories_count;
-
+          if (totalLossAmount) totalLossAmount.textContent = krw(-data.loss_total);
+          if (totalLossCount)  totalLossCount.textContent = `항목 ${data.loss_count}개`;
+          if (totalFinanceAmount) totalFinanceAmount.textContent = krw(data.finances_total);
+          if (totalFinanceCount)  totalFinanceCount.textContent = `기록 ${data.finances_count}개`;
+          if (totalCategories) totalCategories.textContent = data.categories_count;
           activitiesList.innerHTML = '';
           (data.recent_activities || []).forEach(act=>{
             const d = document.createElement('div');

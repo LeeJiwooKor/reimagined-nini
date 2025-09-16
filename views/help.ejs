@@ -1,0 +1,63 @@
+<%- include('./partials/header') %>
+<style>
+
+/* Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.modal[aria-hidden="true"] { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  min-width: 320px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.modal-actions {
+  text-align: right;
+  margin-top: 15px;
+}
+
+</style>
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>문의 / 도움말</h1>
+    </div>
+
+    <div class="card" style="padding:18px; max-width:900px;">
+      <h3>지원 채널</h3>
+      <p>이 프로젝트 관련 문의가 있으시면 아래를 이용하세요.</p>
+      <ul>
+        <li>이메일: <strong>support@example.com</strong></li>
+        <li>깃헙 이슈: 프로젝트 레포지터리의 Issues</li>
+      </ul>
+
+      <h3>간단한 가이드</h3>
+      <ol>
+        <li>계좌 추가 → 은행 탭에서 빠르게 추가/삭제</li>
+        <li>지출/기록 추가 → 지출 페이지 또는 기록 페이지에서 관리</li>
+        <li>대시보드 새로고침 → 우측 상단에서 새로고침 버튼</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>

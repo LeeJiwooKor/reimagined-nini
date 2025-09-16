@@ -1,0 +1,123 @@
+<%- include('./partials/header') %>
+<style>
+
+/* Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.modal[aria-hidden="true"] { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  min-width: 320px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.modal-actions {
+  text-align: right;
+  margin-top: 15px;
+}
+
+</style>
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>계좌 (Accounts)</h1>
+      <div class="actions">
+        <button id="open-account-modal" class="btn btn-primary">+ 계좌 추가</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="records-table" aria-label="계좌 목록">
+        <thead>
+          <tr><th>ID</th><th>이름</th><th>유형</th><th>잔액</th><th>생성일</th><th>작업</th></tr>
+        </thead>
+        <tbody>
+          <% if (accounts && accounts.length > 0) { %>
+            <% accounts.forEach(acc => { %>
+              <tr data-id="<%= acc.id %>">
+                <td><%= acc.id %></td>
+                <td><%= acc.name %></td>
+                <td><%= acc.type %></td>
+                <td><%= Number(acc.balance).toLocaleString() %> 원</td>
+                <td><%= acc.created_at ? new Date(acc.created_at).toISOString().slice(0,10) : '-' %></td>
+                <td><button class="delete-account-btn btn btn-danger">삭제</button></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="6" style="text-align:center;">No accounts</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<!-- Add account modal -->
+<div id="account-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close close-account">&times;</button>
+    <h2>새 계좌 추가</h2>
+    <input id="acct-name" class="input" placeholder="계좌 이름" />
+    <select id="acct-type" class="input">
+      <option>Checking</option>
+      <option>Savings</option>
+      <option>Credit</option>
+      <option>Cash</option>
+      <option>Other</option>
+    </select>
+    <div class="modal-actions">
+      <button id="save-account" class="btn btn-primary">저장</button>
+      <button class="btn btn-secondary modal-cancel" data-target="account-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById('account-modal');
+  function show(m){ m.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function hide(m){ m.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+  document.getElementById('open-account-modal').onclick = ()=> show(modal);
+  document.querySelectorAll('.modal-close,.modal-cancel').forEach(b=> b.addEventListener('click', e=> hide(e.target.closest('.modal'))));
+
+  document.getElementById('save-account').onclick = async ()=>{
+    const name = document.getElementById('acct-name').value.trim();
+    const type = document.getElementById('acct-type').value;
+    if(!name) return alert('이름 필요');
+    const res = await fetch('/banking/account/add',{ method:'POST', body: new URLSearchParams({ name, type }) });
+    const j = await res.json();
+    if(j.valid) location.reload(); else alert(j.error||'실패');
+  };
+
+  document.querySelectorAll('.delete-account-btn').forEach(b=>{
+    b.onclick = async ()=> {
+      if(!confirm('삭제하시겠습니까?')) return;
+      const id = b.closest('tr').dataset.id;
+      const res = await fetch('/banking/account/delete', { method:'POST', body: new URLSearchParams({ id }) });
+      const j = await res.json();
+      if(j.valid) location.reload(); else alert('삭제 실패');
+    };
+  });
+})();
+</script>

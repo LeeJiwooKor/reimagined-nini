@@ -27,7 +27,12 @@
     - [리스트작성] 거래상품
     - [필드] 메모
 
-    
+
+
+-- loss set is shit(index.js 294 and probablly more)
+- - graph(loss) not working too
+
+- - category perfectly wrk, total wrk. 
 
 -DB overflow: 2147483647 (2^32 -1) set filter for it
 - - loss ejs is not working ID, set ref to loss and edit

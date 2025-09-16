@@ -1,0 +1,133 @@
+<%- include('./partials/header') %>
+<style>
+
+/* Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.modal[aria-hidden="true"] { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  min-width: 320px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.modal-actions {
+  text-align: right;
+  margin-top: 15px;
+}
+
+</style>
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>거래처 / 협력사</h1>
+      <div class="actions">
+        <button id="open-add-collab" class="btn btn-primary">+ 추가</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="records-table">
+        <thead><tr><th>ID</th><th>이름</th><th>연락처</th><th>메모</th><th>작업</th></tr></thead>
+        <tbody id="collab-body">
+          <% if (collaborators && collaborators.length > 0) { %>
+            <% collaborators.forEach(c=>{ %>
+              <tr data-id="<%= c.id %>">
+                <td><%= c.id %></td>
+                <td><%= c.name %></td>
+                <td><%= c.contact || '-' %></td>
+                <td><%= c.notes || '-' %></td>
+                <td>
+                  <button class="btn btn-secondary edit-collab">수정</button>
+                  <button class="btn btn-danger delete-collab">삭제</button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="5" style="text-align:center;">No collaborators</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<div id="collab-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close">&times;</button>
+    <h2 id="collab-title">협력사 추가</h2>
+    <input id="collab-name" class="input" placeholder="이름" />
+    <input id="collab-contact" class="input" placeholder="연락처" />
+    <textarea id="collab-notes" class="input" placeholder="메모"></textarea>
+    <div class="modal-actions">
+      <button id="save-collab" class="btn btn-primary">저장</button>
+      <button class="btn btn-secondary modal-cancel" data-target="collab-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById('collab-modal'); let editing=null;
+  function show(){ modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function hide(){ modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+  document.getElementById('open-add-collab').onclick = ()=>{
+    editing = null;
+    document.getElementById('collab-title').textContent = '협력사 추가';
+    document.getElementById('collab-name').value=''; document.getElementById('collab-contact').value=''; document.getElementById('collab-notes').value='';
+    show();
+  };
+  document.querySelectorAll('.modal-close,.modal-cancel').forEach(b=>b.addEventListener('click', e=> hide()));
+
+  document.getElementById('save-collab').onclick = async ()=>{
+    const payload = { name: document.getElementById('collab-name').value.trim(), contact: document.getElementById('collab-contact').value.trim(), notes: document.getElementById('collab-notes').value.trim() };
+    const url = editing ? '/api/collab/edit' : '/api/collab/add';
+    if(editing) payload.id = editing;
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const j = await res.json();
+    if(j.valid) location.reload(); else alert(j.error || '실패');
+  };
+
+  document.querySelectorAll('.edit-collab').forEach(btn=>{
+    btn.onclick = ()=>{
+      const tr = btn.closest('tr'); editing = tr.dataset.id;
+      document.getElementById('collab-title').textContent = '협력사 수정';
+      document.getElementById('collab-name').value = tr.children[1].textContent;
+      document.getElementById('collab-contact').value = tr.children[2].textContent;
+      document.getElementById('collab-notes').value = tr.children[3].textContent;
+      show();
+    };
+  });
+  document.querySelectorAll('.delete-collab').forEach(btn=>{
+    btn.onclick = async ()=>{
+      if(!confirm('삭제하시겠습니까?')) return;
+      const id = btn.closest('tr').dataset.id;
+      const res = await fetch('/api/collab/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id })});
+      const j = await res.json();
+      if(j.valid) location.reload(); else alert('삭제 실패');
+    };
+  });
+})();
+</script>

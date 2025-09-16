@@ -1,0 +1,94 @@
+<%- include('./partials/header') %>
+
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>기록 (Records)</h1>
+      <div class="actions">
+        <button id="open-add-record" class="btn btn-primary">+ 기록 추가</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="records-table" aria-label="기록 목록">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>카테고리</th>
+            <th>금액</th>
+            <th>설명</th>
+            <th>날짜</th>
+          </tr>
+        </thead>
+        <tbody id="records-body">
+          <% if (records && records.length > 0) { %>
+            <% records.forEach(r => { %>
+              <tr>
+                <td><%= r.id %></td>
+                <td><%= r.category_name || '-' %></td>
+                <td><%= Number(r.amount).toLocaleString() %></td>
+                <td><%= r.description || '-' %></td>
+                <td><%= r.created_at %></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="5" style="text-align:center;">No records</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<!-- Simple Add Modal -->
+<div id="add-record-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close close-record">&times;</button>
+    <h2>새 기록 추가</h2>
+    <input id="rec-amount" class="input" placeholder="금액" />
+    <input id="rec-desc" class="input" placeholder="설명" />
+    <select id="rec-cat" class="input">
+      <option value="">(카테고리 선택)</option>
+    </select>
+    <div class="modal-actions">
+      <button id="save-record" class="btn btn-primary">저장</button>
+      <button class="btn btn-secondary modal-cancel" data-target="add-record-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const modal = document.getElementById('add-record-modal');
+  function show(m){ m.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function hide(m){ m.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+  document.getElementById('open-add-record').onclick = async ()=>{
+    // populate categories
+    const catSel = document.getElementById('rec-cat');
+    catSel.innerHTML = '<option value="">(로딩...)</option>';
+    try {
+      const res = await fetch('/category');
+      // category page is not an API — fetch categories from API if you have one
+      // fallback: use /api/dashboard/summary to check categories_count (not ideal)
+      // We'll request a simple JSON endpoint if available; else show manual input
+      // If you have an API for categories, replace below with that request.
+      catSel.innerHTML = '<option value="">(선택 없음)</option>';
+    } catch(e){
+      catSel.innerHTML = '<option value="">(선택 없음)</option>';
+    }
+    show(modal);
+  };
+
+  document.querySelectorAll('.modal-close,.modal-cancel').forEach(b => b.addEventListener('click', e => hide(e.target.closest('.modal'))));
+
+  document.getElementById('save-record').onclick = async ()=>{
+    const payload = { amount: document.getElementById('rec-amount').value, description: document.getElementById('rec-desc').value, category_id: null };
+    const res = await fetch('/api/records/add', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const j = await res.json();
+    if (j.valid) location.reload(); else alert(j.error || '실패');
+  };
+})();
+</script>

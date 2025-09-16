@@ -1,0 +1,149 @@
+<%- include('./partials/header') %>
+<style>
+
+/* Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.modal[aria-hidden="true"] { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  min-width: 320px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.modal-actions {
+  text-align: right;
+  margin-top: 15px;
+}
+
+</style>
+<main>
+  <section class="view-section">
+    <div class="view-header">
+      <h1>주문 (Orders)</h1>
+      <div class="actions">
+        <button id="open-add-order" class="btn btn-primary">+ 주문 추가</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="records-table">
+        <thead><tr><th>ID</th><th>주문번호</th><th>고객</th><th>총액</th><th>상태</th><th>날짜</th><th>작업</th></tr></thead>
+        <tbody id="orders-body">
+          <% if (orders && orders.length > 0) { %>
+            <% orders.forEach(o=>{ %>
+              <tr data-id="<%= o.id %>">
+                <td><%= o.id %></td>
+                <td><%= o.order_number %></td>
+                <td><%= o.customer || '-' %></td>
+                <td><%= Number(o.total).toLocaleString() %></td>
+                <td><%= o.status %></td>
+                <td><%= o.created_at %></td>
+                <td>
+                  <button class="btn btn-secondary edit-order">수정</button>
+                  <button class="btn btn-danger delete-order">삭제</button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="7" style="text-align:center;">No orders</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer') %>
+
+<!-- Add/Edit modal -->
+<div id="order-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close">&times;</button>
+    <h2 id="order-title">주문 추가</h2>
+    <input id="order-number" class="input" placeholder="주문번호" />
+    <input id="order-customer" class="input" placeholder="고객" />
+    <input id="order-total" class="input" placeholder="총액" type="number" />
+    <select id="order-status" class="input">
+      <option>Pending</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option>
+    </select>
+    <div class="modal-actions">
+      <button id="save-order" class="btn btn-primary">저장</button>
+      <button class="btn btn-secondary modal-cancel" data-target="order-modal">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const modal = document.getElementById('order-modal');
+  function show(m){ m.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function hide(m){ m.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+  let editingId = null;
+
+  document.getElementById('open-add-order').onclick = ()=>{
+    editingId = null;
+    document.getElementById('order-title').textContent = '주문 추가';
+    document.getElementById('order-number').value=''; document.getElementById('order-customer').value=''; document.getElementById('order-total').value=''; document.getElementById('order-status').value='Pending';
+    show(modal);
+  };
+  document.querySelectorAll('.modal-close,.modal-cancel').forEach(b=>b.addEventListener('click', e=> hide(e.target.closest('.modal'))));
+
+  document.getElementById('save-order').onclick = async ()=>{
+    const payload = {
+      order_number: document.getElementById('order-number').value.trim(),
+      customer: document.getElementById('order-customer').value.trim(),
+      total: document.getElementById('order-total').value,
+      status: document.getElementById('order-status').value
+    };
+    const url = editingId ? '/api/orders/edit' : '/api/orders/add';
+    if(editingId) payload.id = editingId;
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const j = await res.json();
+    if(j.valid) location.reload(); else alert(j.error||'실패');
+  };
+
+  document.querySelectorAll('.edit-order').forEach(btn=>{
+    btn.onclick = (e) => {
+      const tr = btn.closest('tr');
+      editingId = tr.dataset.id;
+      document.getElementById('order-title').textContent = '주문 수정';
+      document.getElementById('order-number').value = tr.children[1].textContent;
+      document.getElementById('order-customer').value = tr.children[2].textContent;
+      document.getElementById('order-total').value = tr.children[3].textContent.replace(/,/g,'');
+      document.getElementById('order-status').value = tr.children[4].textContent;
+      show(modal);
+    };
+  });
+
+  document.querySelectorAll('.delete-order').forEach(btn=>{
+    btn.onclick = async ()=>{
+      if(!confirm('삭제하시겠습니까?')) return;
+      const id = btn.closest('tr').dataset.id;
+      const res = await fetch('/api/orders/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id })});
+      const j = await res.json();
+      if(j.valid) location.reload(); else alert('삭제 실패');
+    };
+  });
+})();
+</script>
