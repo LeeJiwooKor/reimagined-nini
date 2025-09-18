@@ -1,5 +1,5 @@
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Arial', sans-serif !important;
     margin: 0;
     padding: 0;
     background: linear-gradient(to bottom, #f9f9f9, #f1f1f1);
