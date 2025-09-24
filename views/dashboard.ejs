@@ -26,6 +26,12 @@
       min-height: calc(100vh - 0px);
     }
 
+    /* TEMP: Hide 은행 계좌 panel */
+    .right-panel .card:first-of-type {
+      display: none !important;
+    }
+
+
     /* ---------- Header ---------- */
     .dash-head {
       display:flex;
@@ -224,6 +230,7 @@
         </div>
 
         <!-- IMPROVED QUICK ADD -->
+         <!---->
         <div class="quick-group" aria-label="quick add account">
           <div class="q-input" title="계좌명">
             <input id="quickName" type="text" placeholder="새 계좌명 (예: 내 주거래계좌)" />

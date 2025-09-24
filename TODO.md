@@ -1,31 +1,16 @@
 # Request
 
-- 대시보드에 내역 업데이트 안됨
 
-- 메인에 [내역 추가] 버튼 오른쪽 위에 초록색으로 배치
+# THIS PROJECT IS CURRENTLY OFF-DEVELOPMENT. 
+- development finished: 2025.09.19
+- future development roadmap is as below:
+- - # 1. login/session
+- - # 2. DB upgrade
+- - # 3. seperate personal/commercial
+- - # 4. add active backend/frontend '/help' page
+- All features worked perfectly based on current express.js version 4.17.1
 
-- 입금 / 투자 → 입금 / 출금
 
-- 은행거래 메뉴 사용법좀 알려주셈
-
-- 대시보드에 맨 오른쪽 카드 사용 말고 수익으로 바꾸기
-
-    - 이익이면 +0000 / 손해이면 -0000 표기
-
-- 주문 추가 화면
-    - [선택] 주문 게이트웨이 (Cafe24 / Smartstore)
-    - [필드] 주문번호
-    - [필드] 운송장번호
-    - [필드] 입금(예정)금액
-    - [선택] 상태 (입금전 / 결제완료 / 배송준비중 / 출고완료/배송중 / 배송완료 / 구매확정)
-    - [필드] 메모
-
-- 거래처 추가 화면
-    - [필드] 상점명
-    - [필드] 전화번호
-    - [필드] 주소
-    - [리스트작성] 거래상품
-    - [필드] 메모
 
 
 

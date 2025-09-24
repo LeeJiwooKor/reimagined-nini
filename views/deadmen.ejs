@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deadman Switch Control</title>
+  <style>
+    body { font-family: Arial; background: #f6f6f7; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .container { background:#fff; padding:40px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-width:500px; width:90%; text-align:center; }
+    h1 { color:#e74c3c; margin-bottom:24px; }
+    input[type="text"] { width:80%; padding:12px; margin-bottom:16px; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+    button { padding:12px 24px; margin:8px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:#fff; transition: background 0.3s ease; }
+    button.on { background:#e74c3c; } button.on:hover { background:#c0392b; }
+    button.off { background:#2ecc71; } button.off:hover { background:#27ae60; }
+    .message { margin-top:16px; font-size:0.95rem; color:#555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Deadman Switch Control</h1>
+    <p>Enter the secret key to toggle the deadman switch:</p>
+    <input type="text" id="key" placeholder="Enter key here" />
+    <div>
+      <button class="on" onclick="toggleDead('on')">Activate</button>
+      <button class="off" onclick="toggleDead('off')">Deactivate</button>
+    </div>
+    <div class="message" id="message"><%= message || '' %></div>
+  </div>
+
+  <script>
+    async function toggleDead(action) {
+      const key = document.getElementById('key').value.trim();
+      if (!key) {
+        document.getElementById('message').textContent = 'Please enter the key.';
+        return;
+      }
+
+      try {
+        // Use POST with JSON body instead of query string
+        const res = await fetch(`/dead/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('message').textContent = data.message;
+        } else {
+          document.getElementById('message').textContent = data.error || 'Operation failed';
+        }
+      } catch (err) {
+        document.getElementById('message').textContent = 'Server error';
+      }
+    }
+  </script>
+</body>
+</html>

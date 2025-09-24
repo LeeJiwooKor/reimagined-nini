@@ -1,6 +1,7 @@
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    categories VARCHAR(255) NOT NULL UNIQUE
+    categories VARCHAR(255) NOT NULL UNIQUE,
+    deadmen BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE records (
@@ -45,8 +46,11 @@ CREATE TABLE alsoValues (
     total_item_delivered INT DEFAULT 0,
     total_item_available INT DEFAULT 0,
     total_item_pending INT DEFAULT 0,
-    total_category INT DEFAULT 0
+    total_category INT DEFAULT 0,
+    deadmen BOOLEAN DEFAULT 0;
+
 );
+
 
 CREATE TABLE losses (
     id INT AUTO_INCREMENT PRIMARY KEY,

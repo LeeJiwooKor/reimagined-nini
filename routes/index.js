@@ -2,6 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const crypto = require('crypto');
+router.use(deadmenMiddleware);
+
 
 // =============== HELPERS ===============
 function formatDateOnly(d) {
@@ -10,17 +13,29 @@ function formatDateOnly(d) {
   return String(d).slice(0, 10);
 }
 
-async function logActivity(action, details = null) {
+
+// replace previous deadmenSwitch function with:
+async function deadmenMiddleware(req, res, next) {
+  // Allow deadman toggle and status routes even if active
+  if (req.path.startsWith('/dead')) return next();
+
   try {
-    await db.query(
-      'INSERT INTO activities (action, details) VALUES (?, ?)',
-      [action, details]
-    );
+    const [[row]] = await db.query('SELECT deadmen FROM categories LIMIT 1');
+    if (row && row.deadmen) {
+      // generate a pseudo-random XID
+      const xid = Math.floor(100000000 + Math.random() * 900000000);
+      return res.status(503).render('503', { xid, message: 'Service temporarily unavailable' });
+    }
   } catch (err) {
-    console.error('logActivity error:', err);
+    console.error('Deadman check failed:', err);
+    // fail-open: allow traffic if DB fails
   }
+
+  next();
 }
 
+// Apply deadman middleware BEFORE all protected routes
+router.use(deadmenMiddleware);
 // Ensure new tables exist (orders, collaborators, records fallback)
 async function ensureTables() {
   try {
@@ -59,6 +74,9 @@ async function ensureTables() {
 ensureTables().catch(e => console.error(e));
 
 // =============== ROUTES ===============
+
+
+
 
 // Home
 router.get('/', (req, res) => res.render('index'));
@@ -339,6 +357,53 @@ router.get('/api/banking/accounts', async (req,res)=>{
   } catch(e){ res.status(500).json({ ok:false,error:'Server error' }); }
 });
 
+// in routes/index.js
+
+// helper to hash the provided key (HMAC-SHA256)
+function makeHash(key) {
+  return crypto.createHmac('sha256', 'f7b3c9d1a8e2456f9b2c0e7a4d1f9c8e')
+               .update(key)
+               .digest('hex');
+               
+};
+router.get('/dead', async (req, res) => {
+  try {
+    const [[row]] = await db.query('SELECT deadmen FROM categories LIMIT 1');
+    const isActive = row && row.deadmen ? true : false;
+    res.render('deadmen', { message: `Deadman switch is currently ${isActive ? 'ACTIVE' : 'INACTIVE'}.` });
+  } catch (err) {
+    res.render('deadmen', { message: 'Unable to fetch deadman switch status.' });
+  }
+});
+
+router.post('/dead/on', async (req, res) => {
+  const key = req.body.key;
+  const expectedHash = makeHash('EnergyData');
+  if (!key || key !== expectedHash) return res.status(403).json({ ok: false, error: 'Forbidden: invalid key' });
+  
+  try {
+    await db.query('UPDATE categories SET deadmen = 1');
+    res.json({ ok: true, message: 'Deadman switch ACTIVATED' });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Server error' });
+  }
+});
+
+router.post('/dead/off', async (req, res) => {
+  const key = req.body.key;
+  const expectedHash = makeHash('EnergyData');
+  if (!key || key !== expectedHash) return res.status(403).json({ ok: false, error: 'Forbidden: invalid key' });
+  
+  try {
+    await db.query('UPDATE categories SET deadmen = 0');
+    res.json({ ok: true, message: 'Deadman switch DEACTIVATED' });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Server error' });
+  }
+});
+
+
+
 router.get('/api/dashboard/trends', async (req,res)=>{
   try {
     const months = Math.min(Math.max(Number(req.query.months)||6,3),24);
@@ -355,4 +420,4 @@ router.get('/api/dashboard/trends', async (req,res)=>{
 // 404
 router.use((req,res)=>res.status(404).render('404',{ title:'Page Not Found' }));
 
-module.exports = router;
+module.exports = { router, deadmenMiddleware };
