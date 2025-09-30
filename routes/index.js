@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const crypto = require('crypto');
-router.use(deadmenMiddleware);
 
 
 // =============== HELPERS ===============
@@ -16,23 +15,22 @@ function formatDateOnly(d) {
 
 // replace previous deadmenSwitch function with:
 async function deadmenMiddleware(req, res, next) {
-  // Allow deadman toggle and status routes even if active
-  if (req.path.startsWith('/dead')) return next();
+  // robust bypass
+  const bypassPaths = ['/dead', '/dead/on', '/dead/off'];
+  if (bypassPaths.includes(req.path)) return next();
 
   try {
     const [[row]] = await db.query('SELECT deadmen FROM categories LIMIT 1');
     if (row && row.deadmen) {
-      // generate a pseudo-random XID
-      const xid = Math.floor(100000000 + Math.random() * 900000000);
-      return res.status(503).render('503', { xid, message: 'Service temporarily unavailable' });
+      return res.render('503', { message: 'Deadman switch is ACTIVE. Access denied.' });
     }
   } catch (err) {
     console.error('Deadman check failed:', err);
-    // fail-open: allow traffic if DB fails
   }
 
   next();
 }
+
 
 // Apply deadman middleware BEFORE all protected routes
 router.use(deadmenMiddleware);
